@@ -79,10 +79,10 @@ def getRefinedCorpusList(corpusCrawlDataList):
         textContent = ' '.join(textContent.split())
 
         class DataObj:
-            def __init__(self,link,text):
+            def __init__(self,link,textContent):
                 self.link = link
-                self.text = text
-        result = DataObj(link, text)
+                self.text = textContent
+        result = DataObj(link, textContent)
         refineCorpusList.append(result)
 
     try:
