@@ -1,99 +1,100 @@
-import os
-import re
+
+# import statements # 
+
+from bs4 import BeautifulSoup           # python libary to parse html pages #
+import urllib.request                   # python module to handle opening of http urls #
 from bs4.element import Comment
-import requests
+import requests                         
 from flask import Flask, render_template, request, redirect, url_for
-from bs4 import BeautifulSoup
-import urllib.request
-import time
+import time                             # python methods to suspend execution of threads
+import os                               # Allows to run command in python script #
+import re                               # import statement for regular expressions #
 
 
-def cleanText(element):
-    if element.parent.name in ['style','script','head','title','meta','[document]']:
+def cleanText(htmlContent):
+    """ Method to extract visible texts from html content.
+    """
+    if htmlContent.parent.name in ['style','script','head','title','meta','[document]']:
         return False
-    if isinstance(element, Comment):
+    if isinstance(htmlContent, Comment):
         return False
 
     return True
 
 def extractCorpusFromLinks():
-    with open("allCrawlLinks.txt", "r", encoding="utf-8") as f:
-        links = f.readlines()
+    """ Method to extract corpus list of document content from crawl url.
+    """
+    crawlFilePath="allCrawlLinks.txt"
+    with open(crawlFilePath, "r", encoding="utf-8") as f:
+        allLinksCollection = f.readlines() # reading data from file
     f.close()
 
-    temp_database = []
+    corpusCrawlDataList = []
 
-    for link in links:
+    for link in allLinksCollection:
         try:   
-            
-
             response=requests.get(link)
             if response.status_code==429:
                 time.sleep(int[response.headers["Retry-After"]])
             else:
                 html=urllib.request.urlopen(link).read()
-                soup = BeautifulSoup(html, 'html.parser')
+                soupTagRef = BeautifulSoup(html, 'html.parser')
               
-                
-
-            # f = urllib.request.urlopen('http://www.python.org/')
-            # html = f.read().decode('utf-8')
-            # print(html) 
-            # headersVal = {
-            #     'User-Agent': "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
-            # }
-            # r = requests.get(link, headers=headersVal,timeout=10 )
-            # print("status code is", r.status_code, "  " , link)
-            # if r.status_code == 404:
-            #     continue
-            # soup = BeautifulSoup(r.content, 'html.parser')
-            # if soup.title:
-            #     print("Here",soup.title)
-            #     if "Page not found" in soup.title.text:
-            #         print("Page not found")
-            #         continue
-
-            class Obj:
-                def __init__(self, link, soup):
+            class DataObj:
+                def __init__(self, link, soupTagRef):
                     self.link = link
-                    self.soup = soup
-            result = Obj(link, soup)
-            print(" Appending links ", link)
-            temp_database.append(result)
+                    self.soupTagRef = soupTagRef
+            result = DataObj(link, soupTagRef)
+
+            print("debug: Appending links ", link)
+            corpusCrawlDataList.append(result)  # appending dataObj to corpusCrawlDataList
+
         except Exception as e:
-            print('Invalid link')
+            print('debug: Link Crawl Exception: ')
             print(e)
             pass
+    
     f.close()
-    print(temp_database)
-    corpus = []
-    for obj in temp_database:
-        link = obj.link
-        soup = obj.soup
-        text =  soup.get_text()
-        text = re.sub(r'[^\x00-\x7F]+', ' ', text)
-        # allTexts=soup.findAll(text=True)
-        # text =  filter(cleanText,allTexts)
-        # text=u" ".join(t.strip() for t in text)
-        text = text.replace('\n', ' ')
-        text = ' '.join(text.split())
+    print("debug: corpusCrawlDataList")
+    print(corpusCrawlDataList)
+    
+    cleanCorpusList=getRefinedCorpusList(corpusCrawlDataList)
+    return cleanCorpusList  # return list
 
-        class Obj:
-            def __init__(self, link, text):
+def getRefinedCorpusList(corpusCrawlDataList):
+    """ Method to generate refineCorpusList.
+    """
+    corpusFilePath="corpus.txt"
+    refineCorpusList = []
+    for item in corpusCrawlDataList:
+        link = item.link
+        soupTagRef = item.soupTagRef
+        textContent =  soupTagRef.get_text()
+        # textContent =  soupTagRef.get_text(strip=True)
+        textContent = re.sub(r'[^\x00-\x7F]+', ' ', textContent)   # regex to replace non-ascii with space
+        # allTexts=soupTagRef.findAll(text=True)
+        # textContent =  filter(cleanText,allTexts)
+        # textContent=u" ".join(t.strip() for t in text)
+        textContent = textContent.replace('\n', ' ')
+        textContent = ' '.join(textContent.split())
+
+        class DataObj:
+            def __init__(self,link,text):
                 self.link = link
                 self.text = text
-        result = Obj(link, text)
-        corpus.append(result)
+        result = DataObj(link, text)
+        refineCorpusList.append(result)
 
     try:
-        os.remove("corpus.txt")
+        os.remove(corpusFilePath)  # clear existing contents of file
     except:
         pass
 
-    print("corpus", len(corpus))
-    with open("corpus.txt", "w", encoding="utf-8") as f:
-        for obj in corpus:
-            f.write("Link:{}Doc:{}\n".format(obj.link, obj.text))
+    print("refineCorpusList", len(refineCorpusList))
+    
+    with open(corpusFilePath, "w", encoding="utf-8") as f:
+        for item in refineCorpusList:
+            f.write("Link:{}Doc:{}\n\n".format(item.link, item.text))
     f.close()
 
-    return corpus
+    return refineCorpusList
