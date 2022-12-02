@@ -9,6 +9,15 @@ import time                              # python methods to suspend execution o
 viewHeader="Welcome to IRS Search Activity"
 app = Flask(__name__)                    # Flask constructor takes the name of current module
 
+@app.route("/", methods=["GET", "POST"])
+def index():                            # Python decorator that Flask provides to assign URLs in our app
+    if request.method == 'POST':
+        query = request.form['search']
+        return redirect(url_for('search', query=query))
+    else:
+        return render_template("index.html", title=viewHeader)
+
+        
 @app.route("/<query>")                   # Python decorator that Flask provides to assign URLs in our app
 def search(query):
 
@@ -55,7 +64,8 @@ def getInternalLinks(page_url, allLinksCollection, pageLinksSet):
         if "href" in link.attrs:
             if link.attrs["href"] not in pageLinksSet:  # checking if link already added in set , to avoid duplicates #
                 internalLinkUrl = link.attrs["href"]
-                # print("debug: ",internalLinkUrl)
+                print("debug: getInternalLinks")
+                print(internalLinkUrl)
                 pageLinksSet.add(internalLinkUrl)
                 getInternalLinks(internalLinkUrl, allLinksCollection, pageLinksSet)
         else :
@@ -72,7 +82,8 @@ def webCrawler():
     if request.method == 'POST':
         responseObj = requests.get(seedUrl, timeout=25)
         htmlContent = responseObj.text
-        print("debug: ",htmlContent)  # print statements for Debugging #
+        print("debug: webCrawler")
+        print(htmlContent)  # print statements for Debugging #
         soup = BeautifulSoup(htmlContent, "html.parser")
 
         pageLinksSet= set()  # initialize set #      
@@ -81,7 +92,8 @@ def webCrawler():
         getInternalLinks("", allLinksCollection, pageLinksSet)
         time.sleep(3)
 
-        print("debug: ",pageLinksSet)     # print statements for Debugging #
+        print("debug: pageLinksSet")
+        print(pageLinksSet)     # print statements for Debugging #
         
       
         with open(crawlFilePath, "w", encoding="utf-8") as f:
@@ -93,7 +105,7 @@ def webCrawler():
         f.close()
 
         with open(crawlFilePath, "r", encoding="utf-8") as f:
-            linksUrl = f.readlines()
+            linksUrl = f.readlines()  # reading data from file 
         f.close()
 
         return render_template("index.html", title=viewHeader, links=linksUrl)  # render html view #
@@ -101,21 +113,16 @@ def webCrawler():
         print("In else app.py")
         try:
             with open(crawlFilePath, "r", encoding="utf-8") as f:
-                linksUrl = f.readlines()
+                linksUrl = f.readlines() # reading data from file
             f.close()
         except:
             linksUrl = []
 
         corpus = extractCorpusFromLinks()
 
-        print("debug: "+linksUrl)
+        print("debug: linksUrl")
+        print(linksUrl)
         return render_template("index.html", title=viewHeader, links=linksUrl)
 
 
-@app.route("/", methods=["GET", "POST"])
-def index():
-    if request.method == 'POST':
-        query = request.form['search']
-        return redirect(url_for('search', query=query))
-    else:
-        return render_template("index.html", title=viewHeader)
+
