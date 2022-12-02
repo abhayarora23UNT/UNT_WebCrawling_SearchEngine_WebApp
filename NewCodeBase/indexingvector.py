@@ -1,110 +1,83 @@
-from sklearn.metrics.pairwise import cosine_similarity
+
+# import statements # 
+
+from sklearn.metrics.pairwise import cosine_similarity 
 from sklearn.feature_extraction.text import TfidfVectorizer
 import nltk
 import pandas as pd
 from nltk.corpus import stopwords
 
 
-def vectorModel(query):
-    print("Query: " + query)
-    open_file = open('corpus.txt', 'r')
-    corpus = open_file.readlines()
+# Method for vector space model
+def vectorSpaceModel(query):
 
-    vectorizer = TfidfVectorizer()
-    X = vectorizer.fit_transform(corpus)
-
-    vector = X
-    df1 = pd.DataFrame(
-        vector.toarray(), columns=vectorizer.get_feature_names_out())
-    df1
-
+    openCorpusInfo = open('corpusInfo.txt', 'r') #  corpusInfo.txt has all the valid URL and Content 
+    corpusData = openCorpusInfo.readlines() # Reading corpus file
+    stopWords = set(stopwords.words('english')) #Setting stopwords
     nltk.download('punkt')
     nltk.download('stopwords')
+    def toGenerateTokens(LinkData):
+    # generateTokens by reading LinkData using nltk
+        tokenData = nltk.word_tokenize(LinkData)
+        return tokenData
 
-    stop_words = set(stopwords.words('english'))
-
-    def get_tokenized_list(doc_text):
-        tokens = nltk.word_tokenize(doc_text)
-        return tokens
-
-    def word_stemmer(token_list):
-        ps = nltk.stem.SnowballStemmer("english")
+    def wordStemmer(tokenList):
+    # wordStemmer using SnowballStemmer to remove inflexional ending
+        stemmedWord = nltk.stem.SnowballStemmer("english")
         stemmed = []
-        for words in token_list:
-            stemmed.append(ps.stem(words))
+        for words in tokenList:
+            stemmed.append(stemmedWord.stem(words))
         return stemmed
 
-    def remove_stopwords(doc_text):
-        cleaned_text = []
-        for words in doc_text:
-            if words not in stop_words:
-                cleaned_text.append(words)
-        return cleaned_text
+    def toReadStopWords(LinkData):
+    # toReadStopWords from LinkData
+        CleanContent = []
+        for token in LinkData:
+            if token not in stopWords:
+                CleanContent.append(token)
+        return CleanContent
 
-    tokens = get_tokenized_list(corpus[1])
+    tokenData = toGenerateTokens(corpusData[1])
+    LinkData = toReadStopWords(tokenData)
+    LinkData = wordStemmer(LinkData)
+    document = ' '.join(LinkData)
 
-    doc_text = remove_stopwords(tokens)
-
-    doc_text = word_stemmer(doc_text)
-    doc_text
-
-    doc_ = ' '.join(doc_text)
-    print("Document in vsm", doc_)
-
-    cleaned_corpus = []
-    for doc in corpus:
-        tokens = get_tokenized_list(doc)
-        doc_text = remove_stopwords(tokens)
-        doc_text = word_stemmer(doc_text)
-        doc_text = ' '.join(doc_text)
-        cleaned_corpus.append(doc_text)
-    # cleaned_corpus
-    print("cleaned_corpus", cleaned_corpus)
+    ModifiedCorpus = []
+    for data in corpusData:
+        tokenData = toGenerateTokens(data)
+        LinkData = toReadStopWords(tokenData)
+        LinkData = wordStemmer(LinkData)
+        LinkData = ' '.join(LinkData)
+        ModifiedCorpus.append(LinkData) # This contains data after preprocessing stage
 
     vectorizerX = TfidfVectorizer(stop_words='english')
-    vectorizerX.fit(cleaned_corpus)
-    print("cleaned_corpus", cleaned_corpus)
-    doc_vector = vectorizerX.transform(cleaned_corpus)
-    print("Meghana123", doc_vector)
-    doc_vector1 = vectorizerX.fit_transform(cleaned_corpus)
-    print("doc_vector", doc_vector1)
-
-    df1 = pd.DataFrame(doc_vector.toarray(),
+    documentVector = vectorizerX.fit_transform(ModifiedCorpus)
+    dataFrame = pd.DataFrame(documentVector.toarray(),
                        columns=vectorizerX.get_feature_names_out())
-    print("DataFrame", df1)
 
-    df2 = pd.DataFrame(doc_vector1.toarray(),
-                       columns=vectorizerX.get_feature_names_out())
-    print("DataFrame1", df2)
+    query = toGenerateTokens(query)
+    query = toReadStopWords(query)
+    queryData = []
+    for word in wordStemmer(query):
+        queryData.append(word)
+    queryData = ' '.join(queryData)
+    queryVector = vectorizerX.transform([queryData])
+    #Using cosineSimilarities to find similarity between query and existing link and content 
+    cosineSimilarityValues = cosine_similarity(documentVector, queryVector).flatten()
+    #Top 11 documents will be displayed on the top
+    topScoredDocuments = cosineSimilarityValues.argsort()[:-12:-1]
 
-    query = get_tokenized_list(query)
-    print("AfterTokeniization", query)
-    query = remove_stopwords(query)
-    print("AfterStopWord", query)
-    q = []
-    for w in word_stemmer(query):
-        q.append(w)
-    q = ' '.join(q)
-    print("q", q)
-    query_vector = vectorizerX.transform([q])
-    print("query_vector", query_vector)
-    cosineSimilarities = cosine_similarity(doc_vector, query_vector).flatten()
-    print("cosineSimilarities", cosineSimilarities)
-    related_docs_indices = cosineSimilarities.argsort()[:-12:-1]
-    print("related_docs_indices", related_docs_indices)
-    print(related_docs_indices)
-
-    results = []
-
-    for i in related_docs_indices:
-        if 'link :' in cleaned_corpus[i-1]:
-            link = cleaned_corpus[i-1].replace("link : ", "")
-            doc = corpus[i].replace("Doc:", "")
+    toBeDisplayedDocuments = []
+    #This loop returns documents which will be displayed
+    for index in topScoredDocuments:
+        if 'link :' in ModifiedCorpus[index-1]:
+            link = ModifiedCorpus[index-1].replace("link : ", "")
+            linkData = corpusData[index].replace("Doc:", "")
 
             obj = {
                 'link': link,
-                'doc': doc
+                'doc': linkData
             }
-            results.append(obj)
+            toBeDisplayedDocuments.append(obj)
 
-    return results
+    return toBeDisplayedDocuments

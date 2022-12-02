@@ -64,7 +64,7 @@ def extractCorpusFromLinks():
 def getRefinedCorpusList(corpusCrawlDataList):
     """ Method to generate refineCorpusList.
     """
-    corpusFilePath="corpus.txt"
+    corpusFilePath="corpusInfo.txt"
     refineCorpusList = []
     for item in corpusCrawlDataList:
         link = item.link

@@ -1,7 +1,7 @@
 # Import Statements #
 import requests
 from bs4 import BeautifulSoup           # python libary to parse html pages #
-from indexingvector import vectorModel  # importing methods from another python file name indexing vector
+from indexingvector import vectorSpaceModel  # importing methods from another python file name indexing vector
 from flask import Flask, render_template, request, redirect, url_for # python library to build web application
 from corpusCrawler import extractCorpusFromLinks  # importing methods from another python file name corpusCrawler
 import time                              # python methods to suspend execution of threads
@@ -24,7 +24,7 @@ def search(query):
     if not query:
         return redirect(url_for('index'))
     else:
-        results = vectorModel(query)
+        results = vectorSpaceModel(query)
 
         outputs = []
 
