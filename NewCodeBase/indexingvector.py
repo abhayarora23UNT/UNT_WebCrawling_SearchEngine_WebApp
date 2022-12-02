@@ -5,7 +5,7 @@ import pandas as pd
 from nltk.corpus import stopwords
 
 
-def vsm(query):
+def vectorModel(query):
     print("Query: " + query)
     open_file = open('corpus.txt', 'r')
     corpus = open_file.readlines()

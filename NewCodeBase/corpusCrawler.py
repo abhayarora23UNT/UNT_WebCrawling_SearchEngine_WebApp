@@ -16,8 +16,8 @@ def cleanText(element):
 
     return True
 
-def spiderbot():
-    with open("links.txt", "r", encoding="utf-8") as f:
+def extractCorpusFromLinks():
+    with open("allCrawlLinks.txt", "r", encoding="utf-8") as f:
         links = f.readlines()
     f.close()
 

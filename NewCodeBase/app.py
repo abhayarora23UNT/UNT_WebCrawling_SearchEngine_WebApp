@@ -1,21 +1,21 @@
+# Import Statements #
 import requests
-from flask import Flask, render_template, request, redirect, url_for
-from bs4 import BeautifulSoup
-from spiderbot import spiderbot
-from vsm import vsm
-import time
+from bs4 import BeautifulSoup           # python libary to parse html pages #
+from indexingvector import vectorModel  # importing methods from another python file name indexing vector
+from flask import Flask, render_template, request, redirect, url_for # python library to build web application
+from corpusCrawler import extractCorpusFromLinks  # importing methods from another python file name corpusCrawler
+import time                              # python methods to suspend execution of threads
 
+viewHeader="Welcome to IRS Search Activity"
+app = Flask(__name__)                    # Flask constructor takes the name of current module
 
-app = Flask(__name__)
-
-
-@app.route("/<query>")
+@app.route("/<query>")                   # Python decorator that Flask provides to assign URLs in our app
 def search(query):
 
     if not query:
         return redirect(url_for('index'))
     else:
-        results = vsm(query)
+        results = vectorModel(query)
 
         outputs = []
 
@@ -47,69 +47,69 @@ def search(query):
     return render_template("index.html", title="Welcome to IRS Search Activity", query=query, results=outputs)
 
 
-def getInternalLinks(page_url, all_links, pagelinks): 
-    for link in all_links:
+
+def getInternalLinks(page_url, allLinksCollection, pageLinksSet): 
+    """ Method to get internal links.
+    """
+    for link in allLinksCollection:
         if "href" in link.attrs:
-            if link.attrs["href"] not in pagelinks:
-                new_page = link.attrs["href"]
-                print(new_page)
-                pagelinks.add(new_page)
-                getInternalLinks(new_page, all_links, pagelinks)
+            if link.attrs["href"] not in pageLinksSet:  # checking if link already added in set , to avoid duplicates #
+                internalLinkUrl = link.attrs["href"]
+                # print("debug: ",internalLinkUrl)
+                pageLinksSet.add(internalLinkUrl)
+                getInternalLinks(internalLinkUrl, allLinksCollection, pageLinksSet)
+        else :
+            pass
 
 
-
-@app.route("/explorer", methods=["GET", "POST"])
-def explorer():
-    print(request.method)
+@app.route("/webCrawler", methods=["GET", "POST"])  # Python decorator that Flask provides to assign URLs in our app
+def webCrawler():
+    # print("debug: ",request.method)
+    seedUrl="https://unt.edu"
+    hostUrl="unt.edu"
+    crawlFilePath="allCrawlLinks.txt"
+   
     if request.method == 'POST':
-        results = requests.get("https://unt.edu", timeout=25)
-        html = results.text
-        print("debug  "+html)
-        soup = BeautifulSoup(html, "html.parser")
-        pagelinks= set()
-        
-        # all_links= soup.findAll('a', href=lambda href: href and "unt.edu" in href ) 
-        all_links= soup.findAll('a', href=lambda href: href and "unt.edu" in href and "mailto" not in href) 
-        # all_links= soup.findAll('a', href=lambda href: href and "http" in href and "unt.edu" in href and "mailto" not in href) 
-        print("LengthCheck", len(all_links))
-        getInternalLinks("", all_links, pagelinks)
-        # links = soup.find_all(
-        #     "a", href=lambda href: href and "unt.edu" in href and "mailto" not in href)
+        responseObj = requests.get(seedUrl, timeout=25)
+        htmlContent = responseObj.text
+        print("debug: ",htmlContent)  # print statements for Debugging #
+        soup = BeautifulSoup(htmlContent, "html.parser")
+
+        pageLinksSet= set()  # initialize set #      
+        allLinksCollection= soup.findAll('a', href=lambda href: href and hostUrl in href and "mailto" not in href) 
+        print("debug: LengthCheck", len(allLinksCollection))
+        getInternalLinks("", allLinksCollection, pageLinksSet)
         time.sleep(3)
-        print(pagelinks)
+
+        print("debug: ",pageLinksSet)     # print statements for Debugging #
         
-        open("links.txt", "w").close()
+      
+        with open(crawlFilePath, "w", encoding="utf-8") as f:
+            f.write("")  # emptying the files #
 
-        with open("links.txt", "r", encoding="utf-8") as f:
-            test = f.readlines()
-
-        print(test)
-        with open("links.txt", "w", encoding="utf-8") as f:
-            f.write("")
-
-        with open("links.txt", "w", encoding="utf-8") as f:
-            for link in pagelinks:
-                f.write(link + "\n")
+        with open(crawlFilePath, "w", encoding="utf-8") as f:
+            for item in pageLinksSet:
+                f.write(item + "\n")  # appending each link from set to text file 
         f.close()
 
-        with open("links.txt", "r", encoding="utf-8") as f:
-            links = f.readlines()
+        with open(crawlFilePath, "r", encoding="utf-8") as f:
+            linksUrl = f.readlines()
         f.close()
 
-        return render_template("index.html", title="Welcome to IRS Search Activity ", links=links)
+        return render_template("index.html", title=viewHeader, links=linksUrl)  # render html view #
     else:
         print("In else app.py")
         try:
-            with open("links.txt", "r", encoding="utf-8") as f:
-                links = f.readlines()
+            with open(crawlFilePath, "r", encoding="utf-8") as f:
+                linksUrl = f.readlines()
             f.close()
         except:
-            links = []
+            linksUrl = []
 
-        corpus = spiderbot()
+        corpus = extractCorpusFromLinks()
 
-        print(links)
-        return render_template("index.html", title="Welcome to IRS Search Activity ", links=links)
+        print("debug: "+linksUrl)
+        return render_template("index.html", title=viewHeader, links=linksUrl)
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -118,4 +118,4 @@ def index():
         query = request.form['search']
         return redirect(url_for('search', query=query))
     else:
-        return render_template("index.html", title="Welcome to IRS Search Activity ")
+        return render_template("index.html", title=viewHeader)
