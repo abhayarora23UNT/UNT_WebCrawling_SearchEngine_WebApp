@@ -6,39 +6,40 @@
     </title>
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 
 <body>
     <header>
-        <h2 class="bg-success text-white p-2">{{ title }}
-            <!-- show query if it exists -->
-        </h2>
-        <!-- <ul class="nav nav-tabs container">
-            <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{{ url_for('index') }}">Search</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" aria-current="page" href="{{ url_for('webCrawler') }}">Explorer</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{{ url_for('webCrawler') }}"><i class="fa fa-refresh"></i></a>
-              </li>
-        </ul> -->
+        <h3 class="headerBackground text-white p-2">
+            <img class="logo-style" src="./static/logo.png">
+            {{ title }}
+        </h3>
+
     </header>
     <main>
-        <div class="container my-3">
+        <div class="divRefresh">
+            <a href="{{ url_for('webCrawler') }}"><i class="fa fa-bug" title="Crawl"
+                    style="color: black;font-size: 30px;"></i></a>
+        </div>
+
+        <div class="container main-container">
             <form class="container" action="{{ url_for('index') }}" method="POST">
                 <div class="form-group">
-                    <!-- <label for="search" class="col-sm-6 col-form-label"><b>Welcome to IRS Search Activity </b></label> -->
                     <div class="col-sm-12" style="display:inline">
-                    <div class="col-sm-8">
-                        <input type="text" class="form-control" id="search" name="search" placeholder="Search any word.....">
-                        <span class="col-sm-8 align-self-center mt-2">
-                            <button type="submit" class="btn btn-success py-2 mt-2">Search</button>
-                        </span>
-                        <a href="{{ url_for('webCrawler') }}" ><i class="fa fa-refresh" style ="color: green"></i></a>
-                    </div>
+                        <div class="col-12" style="display: flex;">
+                            <div class="col-sm-7">
+                                <input type="text" class="form-control search-widgets" id="search" name="search"
+                                    placeholder="Enter keyword to search">
+                            </div>
+                            <div class="col-sm-5">
+                                <span class="col-sm-8 align-self-center">
+                                    <button type="submit" class="btn btn-success py-2 mt-2">Search</button>
+                                </span>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </form>
@@ -46,14 +47,14 @@
             {% if results %}
             <div class="container my-3">
                 {% if query %}
-                <h3>Search Results for {{ query }}</h3>
+                <h4>Search Results for {{ query }}</h4>
                 {% endif %}
                 <ul class="list-group">
                     {% for result in results %}
 
-                    <li class="list-group-item">
-                        <a href="{{ result.url }}" target="_blank">{{ result.title }}</a><br>
-                        <small class="text-muted">{{ result.url }}</small>
+                    <li class="list-group-item card">
+                        <a href="{{ result.url }}" style="color: #1155CC;" target="_blank">{{ result.title }}</a><br>
+                        <small style="color: #009933;padding-top: 2px;">{{ result.url }}</small>
                         <p>{{ result.description }}</p>
                     </li>
 
@@ -71,5 +72,11 @@
         integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V"
         crossorigin="anonymous"></script>
 </body>
+
+<footer style="background-color: black;">
+    <span class="footerStyle">
+        © 2022 All Rights Reserved: UNT, Information Retrieval Fall-22, Group Number 25
+    </span>
+</footer>
 
 </html>

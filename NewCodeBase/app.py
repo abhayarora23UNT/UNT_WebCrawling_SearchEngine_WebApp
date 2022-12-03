@@ -6,7 +6,7 @@ from flask import Flask, render_template, request, redirect, url_for # python li
 from corpusCrawler import extractCorpusFromLinks  # importing methods from another python file name corpusCrawler
 import time                              # python methods to suspend execution of threads
 
-viewHeader="Welcome to IRS Search Activity"
+viewHeader="University Of North Texas Search"
 app = Flask(__name__)                    # Flask constructor takes the name of current module
 
 @app.route("/", methods=["GET", "POST"])
@@ -53,7 +53,7 @@ def search(query):
             output = Obj(title, link, description)
             outputs.append(output)
 
-    return render_template("index.html", title="Welcome to IRS Search Activity", query=query, results=outputs)
+    return render_template("index.html", title="University Of North Texas Search", query=query, results=outputs)
 
 
 
