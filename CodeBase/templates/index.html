@@ -19,10 +19,10 @@
 
     </header>
     <main>
-        <!-- <div class="divRefresh">
+        <div class="divRefresh">
             <a href="{{ url_for('webCrawler') }}"><i class="fa fa-bug" title="Crawl"
                     style="color: black;font-size: 30px;"></i></a>
-        </div> -->
+        </div>
 
         <div class="container main-container">
             <form class="container" action="{{ url_for('index') }}" method="POST">
@@ -38,19 +38,15 @@
                             </span>
                         </div>
                     </div>
-                    <!-- <div class="col-sm-12" style="display:inline">
-                      
-
-                    </div> -->
                 </div>
             </form>
 
             {% if results %}
             <div class="container my-3">
                 {% if query %}
-                <h4>Search Results for {{ query }}</h4>
+                <h6 style="margin-left: 12px;">Search Results for {{ query }}</h6>
                 {% endif %}
-                <ul class="list-group">
+                <ul class="list-group" style="margin-bottom: 5%;">
                     {% for result in results %}
 
                     <li class="list-group-item card">

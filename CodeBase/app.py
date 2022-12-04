@@ -56,7 +56,7 @@ def search(query):
     return render_template("index.html", title="University Of North Texas Search", query=query, results=outputs)
 
 
-
+# Method Not Used #
 def getInternalLinks(page_url, allLinksCollection, pageLinksSet): 
     """ Method to get internal links.
     """
@@ -78,51 +78,65 @@ def webCrawler():
     seedUrl="https://unt.edu"
     hostUrl="unt.edu"
     crawlFilePath="allCrawlLinks.txt"
-   
-    if request.method == 'POST':
-        responseObj = requests.get(seedUrl, timeout=25)
-        htmlContent = responseObj.text
-        print("debug: webCrawler")
-        print(htmlContent)  # print statements for Debugging #
-        soup = BeautifulSoup(htmlContent, "html.parser")
+    try:
+        with open(crawlFilePath, "r", encoding="utf-8") as f:
+            linksUrl = f.readlines() # reading data from file
+        f.close()
+    except:
+        linksUrl = []
 
-        pageLinksSet= set()  # initialize set #      
-        allLinksCollection= soup.findAll('a', href=lambda href: href and hostUrl in href and "mailto" not in href) 
-        print("debug: LengthCheck", len(allLinksCollection))
-        getInternalLinks("", allLinksCollection, pageLinksSet)
-        time.sleep(3)
+    corpus = extractCorpusFromLinks()  # call method to update Corpus
 
-        print("debug: pageLinksSet")
-        print(pageLinksSet)     # print statements for Debugging #
+    print("debug: linksUrl")
+    print(linksUrl)
+    return render_template("index.html", title=viewHeader, links=linksUrl)
+
+    # Below Code Snippet not used #
+     
+    # if request.method == 'POST':
+    #     responseObj = requests.get(seedUrl, timeout=25)
+    #     htmlContent = responseObj.text
+    #     print("debug: webCrawler")
+    #     print(htmlContent)  # print statements for Debugging #
+    #     soup = BeautifulSoup(htmlContent, "html.parser")
+
+    #     pageLinksSet= set()  # initialize set #      
+    #     allLinksCollection= soup.findAll('a', href=lambda href: href and hostUrl in href and "mailto" not in href) 
+    #     print("debug: LengthCheck", len(allLinksCollection))
+    #     getInternalLinks("", allLinksCollection, pageLinksSet)
+    #     time.sleep(3)
+
+    #     print("debug: pageLinksSet")
+    #     print(pageLinksSet)     # print statements for Debugging #
         
       
-        with open(crawlFilePath, "w", encoding="utf-8") as f:
-            f.write("")  # emptying the files #
+    #     with open(crawlFilePath, "w", encoding="utf-8") as f:
+    #         f.write("")  # emptying the files #
 
-        with open(crawlFilePath, "w", encoding="utf-8") as f:
-            for item in pageLinksSet:
-                f.write(item + "\n")  # appending each link from set to text file 
-        f.close()
+    #     with open(crawlFilePath, "w", encoding="utf-8") as f:
+    #         for item in pageLinksSet:
+    #             f.write(item + "\n")  # appending each link from set to text file 
+    #     f.close()
 
-        with open(crawlFilePath, "r", encoding="utf-8") as f:
-            linksUrl = f.readlines()  # reading data from file 
-        f.close()
+    #     with open(crawlFilePath, "r", encoding="utf-8") as f:
+    #         linksUrl = f.readlines()  # reading data from file 
+    #     f.close()
 
-        return render_template("index.html", title=viewHeader, links=linksUrl)  # render html view #
-    else:
-        print("In else app.py")
-        try:
-            with open(crawlFilePath, "r", encoding="utf-8") as f:
-                linksUrl = f.readlines() # reading data from file
-            f.close()
-        except:
-            linksUrl = []
+    #     return render_template("index.html", title=viewHeader, links=linksUrl)  # render html view #
+    # else:
+    #     print("In else app.py")
+    #     try:
+    #         with open(crawlFilePath, "r", encoding="utf-8") as f:
+    #             linksUrl = f.readlines() # reading data from file
+    #         f.close()
+    #     except:
+    #         linksUrl = []
 
-        corpus = extractCorpusFromLinks()
+    #     corpus = extractCorpusFromLinks()
 
-        print("debug: linksUrl")
-        print(linksUrl)
-        return render_template("index.html", title=viewHeader, links=linksUrl)
+    #     print("debug: linksUrl")
+    #     print(linksUrl)
+    #     return render_template("index.html", title=viewHeader, links=linksUrl)
 
 
 
