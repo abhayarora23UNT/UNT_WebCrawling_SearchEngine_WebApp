@@ -50,8 +50,17 @@
   .footerStyle{
     text-align: end;
     float: right;
-    padding: 20px;
+    padding: 10px;
     font-size: 13px;
     font-weight: bold;
+    color:wheat
 
   }
+
+  #footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 30px;   /* Height of the footer */
+    background: black;
+ }
