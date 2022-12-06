@@ -7,13 +7,14 @@ import nltk
 import pandas as pd
 from nltk.corpus import stopwords
 import json
+from IPython.display import display
 
 # Method for vector space model
 def vectorSpaceModel(query):
 
     f = open('corpusUnt.json')
     corpusJsonData = json.load(f)
-    print(corpusJsonData)
+    #print(debug: corpusJsonData)
 
     openCorpusInfo = open('corpusInfo.txt', 'r') #  corpusInfo.txt has all the valid URL and Content 
     corpusData = openCorpusInfo.readlines() # Reading corpus file
@@ -56,8 +57,14 @@ def vectorSpaceModel(query):
         
     vectorizerX = TfidfVectorizer(stop_words='english')
     documentVector = vectorizerX.fit_transform(ModifiedCorpus)
-    dataFrame = pd.DataFrame(documentVector.toarray(),
+    dfDocumentVec = pd.DataFrame(documentVector.toarray(),
                        columns=vectorizerX.get_feature_names_out())
+
+    print("debug: document pandas")
+    # print(dfDocumentVec)
+    # display(dfDocumentVec)
+    dfDocumentVec.to_csv("documentVector.csv")  
+    print()
 
     query = toGenerateTokens(query)
     query = toReadStopWords(query)
@@ -66,11 +73,26 @@ def vectorSpaceModel(query):
         queryData.append(word)
     queryData = ' '.join(queryData)
     queryVector = vectorizerX.transform([queryData])
+
+    dfQueryVec = pd.DataFrame(queryVector.toarray(),
+                       columns=vectorizerX.get_feature_names_out())
+    print("debug: query pandas")
+    # print(dfQueryVec)
+    # display(dfQueryVec) 
+    dfQueryVec.to_csv("queryVector.csv")  
+    print()
+
     #Using cosineSimilarities to find similarity between query and existing link and content 
     cosineSimilarityValues = cosine_similarity(documentVector, queryVector).flatten()
+
+    # print("debug: cosine similarity")
+    # dfCosine=pd.DataFrame(cosineSimilarityValues)
+    # display(dfQueryVec) 
+    # dfCosine.to_csv("cosineSimilarity.csv")  
+    # print(cosineSimilarityValues)
+
     #Top 11 documents will be displayed on the top
     topScoredDocuments = cosineSimilarityValues.argsort()[:-12:-1]
-
     toBeDisplayedDocuments = []
     #This loop returns documents which will be displayed
     for index in topScoredDocuments:
