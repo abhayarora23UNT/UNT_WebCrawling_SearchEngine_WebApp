@@ -49,7 +49,7 @@ def vectorSpaceModel(query):
         LinkData = wordStemmer(LinkData)
         LinkData = ' '.join(LinkData)
         ModifiedCorpus.append(LinkData) # This contains data after preprocessing stage
-
+        
     vectorizerX = TfidfVectorizer(stop_words='english')
     documentVector = vectorizerX.fit_transform(ModifiedCorpus)
     dataFrame = pd.DataFrame(documentVector.toarray(),
@@ -71,9 +71,8 @@ def vectorSpaceModel(query):
     #This loop returns documents which will be displayed
     for index in topScoredDocuments:
         if 'link :' in ModifiedCorpus[index-1]:
-            link = ModifiedCorpus[index-1].replace("link : ", "")
+            link = corpusData[index-1].replace("Link:", " ")
             linkData = corpusData[index].replace("Doc:", "")
-
             obj = {
                 'link': link,
                 'doc': linkData
