@@ -9,7 +9,7 @@ from flask import Flask, render_template, request, redirect, url_for
 import time                             # python methods to suspend execution of threads
 import os                               # Allows to run command in python script #
 import re                               # import statement for regular expressions #
-
+import json
 
 def cleanText(htmlContent):
     """ Method to extract visible texts from html content.
@@ -91,6 +91,18 @@ def getRefinedCorpusList(corpusCrawlDataList):
         pass
 
     print("refineCorpusList", len(refineCorpusList))
+
+    jsonResult = []
+    for item in refineCorpusList:
+            jsonObj={}
+            jsonObj['url']=item.link
+            jsonObj['urlContent']=item.text
+            jsonResult.append(jsonObj)
+    jsonString = json.dumps(jsonResult)
+
+    with open("corpusUnt.json", "w") as f1:
+        f1.write(jsonString)     
+        f1.close()
     
     with open(corpusFilePath, "w", encoding="utf-8") as f:
         for item in refineCorpusList:

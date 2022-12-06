@@ -6,10 +6,14 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import nltk
 import pandas as pd
 from nltk.corpus import stopwords
-
+import json
 
 # Method for vector space model
 def vectorSpaceModel(query):
+
+    f = open('corpusUnt.json')
+    corpusJsonData = json.load(f)
+    print(corpusJsonData)
 
     openCorpusInfo = open('corpusInfo.txt', 'r') #  corpusInfo.txt has all the valid URL and Content 
     corpusData = openCorpusInfo.readlines() # Reading corpus file
