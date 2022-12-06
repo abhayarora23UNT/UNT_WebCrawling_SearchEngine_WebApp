@@ -42,16 +42,19 @@ def vectorSpaceModel(query):
                 CleanContent.append(token)
         return CleanContent
 
-    tokenData = toGenerateTokens(corpusData[1])
-    LinkData = toReadStopWords(tokenData)
-    LinkData = wordStemmer(LinkData)
-    document = ' '.join(LinkData)
 
     ModifiedCorpus = []
     for data in corpusData:
+        # generateTokens by reading LinkData using nltk
         tokenData = toGenerateTokens(data)
+
+        # toReadStopWords from LinkData
         LinkData = toReadStopWords(tokenData)
+
+        # wordStemmer using SnowballStemmer to remove inflexional ending
         LinkData = wordStemmer(LinkData)
+
+        # combining all the above LinkData
         LinkData = ' '.join(LinkData)
         ModifiedCorpus.append(LinkData) # This contains data after preprocessing stage
         
