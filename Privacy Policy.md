@@ -1,6 +1,6 @@
 Privacy Policy
 
-This application was developed as a part of University Project
+This application was developed as a part of University Project.
 
 Last updated: 05/12/2023
 
